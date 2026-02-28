@@ -1,0 +1,6 @@
+.env
+
+orderflow-backend/node_modules
+orderflow-backend/dist
+orderflow-backend/.gitignore
+orderflow-backend/generated
