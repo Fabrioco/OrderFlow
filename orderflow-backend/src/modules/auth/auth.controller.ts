@@ -21,4 +21,11 @@ export class AuthController {
   async register(@Body() dto: RegisterDto) {
     return this.service.register(dto);
   }
+
+  @Post('verify-email')
+  @ApiBody({ schema: { properties: { email: { type: 'string' } } } })
+  @ApiOkResponse({ description: 'E-mail verificado com sucesso' })
+  async verifyEmail(@Body('email') email: string) {
+    return this.service.confirmEmail(email);
+  }
 }
