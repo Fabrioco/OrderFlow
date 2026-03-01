@@ -1,13 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
 
-@Injectable()
 export class JwtStrategy {
-  constructor() {}
+  private readonly jwtSecret: string;
 
-  async hashPassword(password: string): Promise<string> {
-    const saltOrRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltOrRounds);
-    return hashedPassword;
+  constructor() {
+    this.jwtSecret = process.env.JWT_SECRET!;
+  }
+
+  createToken(userId: string, role: string): string {
+    const payload = { sub: userId, role };
+    const token = jwt.sign(payload, this.jwtSecret, { expiresIn: '1h' });
+    return token;
   }
 }
