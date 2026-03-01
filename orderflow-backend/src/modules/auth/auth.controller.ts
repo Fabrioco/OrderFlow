@@ -8,6 +8,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { RegisterDto } from './dtos/register-request.dto';
+import { LoginDto } from './dtos/login.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -27,5 +28,12 @@ export class AuthController {
   @ApiOkResponse({ description: 'E-mail verificado com sucesso' })
   async verifyEmail(@Body('email') email: string) {
     return this.service.confirmEmail(email);
+  }
+
+  @Post('login')
+  @ApiBody({ type: LoginDto })
+  @ApiOkResponse({ description: 'Login bem-sucedido' })
+  async login(@Body() dto: LoginDto) {
+    return this.service.login(dto);
   }
 }

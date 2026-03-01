@@ -6,13 +6,19 @@ import {
 } from '@nestjs/common';
 import { RegisterDto } from './dtos/register-request.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
 import { UserRole, VehicleType } from 'generated/prisma/enums';
 import { sendEmail } from 'src/utils/send-email.util';
+import { LoginDto } from './dtos/login.dto';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { BcryptStrategy } from './strategies/bcrypt.strategy';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly bcrypt: BcryptStrategy,
+    private readonly jwt: JwtStrategy,
+  ) {}
 
   async register(dto: RegisterDto) {
     const { email, password, name, phone, role, cnh, cnpj, cpf } =
@@ -26,8 +32,7 @@ export class AuthService {
       throw new ConflictException('Usuário com este e-mail já existe');
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await this.bcrypt.hashPassword(password);
 
     return this.prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
@@ -175,5 +180,35 @@ export class AuthService {
       where: { email },
       data: { status: 'ACTIVE' },
     });
+  }
+
+  async login(dto: LoginDto) {
+    const { email, password } = dto as LoginDto;
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    if (user.status !== 'ACTIVE') {
+      throw new UnprocessableEntityException('E-mail não verificado');
+    }
+
+    const isPasswordValid = await this.bcrypt.comparePassword(
+      password,
+      user.password,
+    );
+    if (!isPasswordValid) {
+      throw new UnprocessableEntityException('Senha incorreta');
+    }
+
+    const { password: _, ...userWithoutPassword } = user;
+
+    const token = this.jwt.createToken(user.id, user.role);
+
+    return { ...userWithoutPassword, token };
   }
 }
