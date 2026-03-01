@@ -10,7 +10,7 @@ import {
 import { RegisterDto } from './dtos/register-request.dto';
 import { LoginDto } from './dtos/login.dto';
 
-@ApiTags('auth')
+@ApiTags('Autenticação')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly service: AuthService) {}
