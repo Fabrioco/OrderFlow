@@ -6,6 +6,7 @@ export function setupSwagger(app: INestApplication) {
     .setTitle('OrderFlow API')
     .setDescription('API documentation for OrderFlow')
     .setVersion('1.0')
+    .addTag('Autenticação')
     .addBearerAuth()
     .build();
 
