@@ -93,4 +93,12 @@ export class MailService {
       )}/confirm-email?email=${email}`,
     });
   }
+
+  async sendPasswordResetEmail(email: string, name: string, token: string) {
+    await this.sendMail(email, 'Redefinição de Senha', 'password-reset', {
+      name,
+      year: new Date().getFullYear(),
+      token,
+    });
+  }
 }
